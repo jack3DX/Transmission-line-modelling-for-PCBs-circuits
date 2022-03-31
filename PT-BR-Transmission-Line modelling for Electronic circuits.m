@@ -1,6 +1,10 @@
-% Programa feito como parte do Trabalho de Conclus„o de Curso submetido ao
-% departamento de Engenharia ElÈtrica do Centro de CiÍncias TecnolÛgicas
-% da Universidade do Estado de Santa Catarina.
+%Desenvolvido para Matlab
+%Voc√™ precisa entender o b√°sico da Teoria de Linhas de Transmiss√£o e eletromagnetismo avan√ßado para entender esse c√≥digo
+%Tamb√©m √© necess√°rio ler sobre irradia√ß√£o de energia e a teoria de antenas
+%O c√≥digo processa coordenadas espaciais e temporais, fique atento
+
+%CONTATE-ME PARA MAIS INFORMA√á√ïES
+%Se quiser mais refer√™ncias cientificas, procure por Christopoulos and Faccioni Filho
 
 clc
 clear all
@@ -9,11 +13,11 @@ clear all
 
 l = 8e-2; %comprimento da linha
 nt = 3; %numero de nos
-kt = 50; %n˙mero de iteraÁıes
-RL = 4.7; %Resistencia da carga (neste caso, a resistÍncia de gate)
-Rs = 50; %Resistencia da fonte (considerando um padr„o encontrado durante o curso)
+kt = 50; %n√∫mero de itera√ß√µes
+RL = 4.7; %Resistencia da carga (neste caso, a resist√™ncia de gate)
+Rs = 50; %Resistencia da fonte (considerando um padr√£o encontrado comercialmente)
 
-%No instante K=1, todas as tensoes incidentes s„o nulas
+%No instante K=1, todas as tensoes incidentes s√£o nulas
 
 for n=1:1:nt
     VID(n,1)=0;
@@ -22,12 +26,12 @@ for n=1:1:nt
 end
 
 %Calculo de parametros da linha
-Dx = l/(nt-1); %Incremento espacial em relaÁ„o ao n˙mero de nÛs
-L = 377e-6; %L e C foram obtidos atravÈs dos c·lculos apresentados 
-C = 88.48e-12; 
-R = 0; %Utilizou-se a resistÍncia medida na trilha
-Z0 = 90; %Encontrada atravÈs dos c·lculos
-Dt = sqrt(L*C);
+Dx = l/(nt-1); %Incremento espacial em rela√ß√£o ao n√∫mero de n√≥s
+L = 377e-6; %L √© um numero generalizado de acordo com dados de placa
+C = 88.48e-12; %C √© um numero generalizado de acordo com dados de placa
+R = 0; %Resistencia √© baixissima comparada a L e C, considerou-se zero
+Z0 = 90; %Atrav√©s do calculo da impedancia caracteristica
+Dt = sqrt(L*C); %Incremento do vetor de tempo de acordo com a ressonancia de L e C
 f=500e3; %Frequencia de 500KHz
 
 
@@ -39,17 +43,17 @@ Excitacao = 6+6*square(2*pi*t*f,50) %Onda quadrada com duty cicle de 50%
  end
 
 
-%Inicio da iteraÁ„o no tempo
+%Inicio da itera√ß√£o no tempo
 
 for k=1:1:kt
     
-    %C·lculo da capacit‚ncia e imped‚ncia do capacitor
+    %C√°lculo da capacit√¢ncia e imped√¢ncia do capacitor
         Csw = 5.4e-9
         ZC = Dt/(2*pi*f*Csw)
    
-    %C¡LCULO DAS INCID NCIAS
+    %C√ÅLCULO DAS INCID√äNCIAS
     
-    %Primeiro nÛ, junto ‡ fonte
+    %Primeiro n√≥, junto √† fonte
     for n = 1
         if Rs == 0
             V(n,k)=Vs(k);
@@ -60,7 +64,7 @@ for k=1:1:kt
         VD(n,k)=2*VID(n,k)+I(n,k)*Z0
     end
     
-    %Segundo ao pen˙ltimo nÛ
+    %Segundo ao pen√∫ltimo n√≥
     
     for n=2:1:(nt-1)
         V(n,k)= (2*VIE(n,k)/Z0 + 2*VID(n,k)/(R+Z0))/(1/Z0 + 1/(R+Z0))
@@ -69,7 +73,7 @@ for k=1:1:kt
         VD(n,k)= 2*VID(n,k)+I(n,k)*Z0
     end
     
-    %Para o ˙ltimo nÛ
+    %Para o √∫ltimo n√≥
     
     for n = nt
         V(n,k)= (2*VIE(n,k)/Z0 + 2*VIC(k)/(RL+ZC))/(1/Z0 + 1/(RL+ZC))
@@ -77,53 +81,54 @@ for k=1:1:kt
         VC(k)= 2*VIC(k)+IC(k)*ZC
     end
     
-    %C¡LCULO DAS REFLEX’ES
+    %C√ÅLCULO DAS REFLEX√ïES
     
-    %Primeiro nÛ
+    %Primeiro n√≥
     
     for n=1
         VRD(n,k)=VD(n,k)-VID(n,k)
     end
     
-    %Segundo ao pen˙ltimo nÛ
+    %Segundo ao pen√∫ltimo n√≥
     for n=2:1:(nt-1)
         VRD(n,k)=VD(n,k)-VID(n,k)
         VRE(n,k)=VE(n,k)-VIE(n,k)
     end
     
-    %⁄ltimo nÛ
+    %√öltimo n√≥
     for n= nt
         VRE(n,k)=V(n,k)-VIE(n,k)
         VRC(k)=VC(k)-VIC(k)
     end
     
-    %CONEX√O COM O MOMENTO SEGUINTE
+    %CONEX√ÉO COM O MOMENTO SEGUINTE
     
-    %Primeiro nÛ
+    %Primeiro n√≥
     for n = 1
         VID(n,k+1)=VRE(n+1,k)
     end
     
-    %Segundo ao pen˙ltimo nÛ
+    %Segundo ao pen√∫ltimo n√≥
     for n = 2:1:(nt-1)
         VIE(n,k+1)=VRD(n-1,k)
         VID(n,k+1)=VRE(n+1,k)
     end
     
-    %⁄ltimo nÛ
+    %√öltimo n√≥
     for n=nt
         VIE(n,k+1)=VRD(n-1,k)
         VIC(k+1)= -VRC(k)
     end
 end
 
+%Plot dos resultados
 plot(t,V(nt,1:kt))
-title('Tens„o no ˙ltimo nÛ em relaÁ„o ao tempo')
+title('Tens√£o no √∫ltimo n√≥ em rela√ß√£o ao tempo')
 xlabel('Tempo [s]')
-ylabel('Tens„o [V]')
+ylabel('Tens√£o [V]')
 
 figure
 plot(t,VRC)
 title('Tensao refletida pelo capacitor')
-xlabel('Tempo[s]')
-ylabel('Tens„o[V]')
+xlabel('Tempo [s]')
+ylabel('Tens√£o [V]')
